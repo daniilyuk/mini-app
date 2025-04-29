@@ -14,5 +14,4 @@ run:
   image: null
   jarName: mini-app-0.0.1-SNAPSHOT.jar
   persistenceMount: /data
-  containerPort: 80
-  servicePort: 80
+  containerPort: 8080
