@@ -5,8 +5,7 @@ import antonov.miniapp.dto.ApplicationRequestDto;
 import antonov.miniapp.entity.Application;
 import antonov.miniapp.mapper.ApplicationMapper;
 import antonov.miniapp.service.ApplicationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/applications")
 public class ApplicationController {
-
-    private static final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
 
     private final ApplicationService applicationService;
     private final ApplicationMapper applicationMapper;
@@ -29,8 +27,11 @@ public class ApplicationController {
     }
 
     @PostMapping
-    public ResponseEntity<ApplicationDto> createApplication(@RequestBody ApplicationRequestDto requestDto) {
-        logger.info("Creating new application: {}", requestDto);
+    public ResponseEntity<ApplicationDto> createApplication(
+            @RequestParam String applicationType,
+            @RequestParam(required = false) String description) {
+        log.info("Creating new application with type={} and description={}", applicationType, description);
+        ApplicationRequestDto requestDto = new ApplicationRequestDto(applicationType, description);
         Application application = applicationMapper.toEntity(requestDto);
         Application savedApplication = applicationService.saveApplication(application);
         return new ResponseEntity<>(applicationMapper.toDto(savedApplication), HttpStatus.CREATED);
@@ -38,24 +39,28 @@ public class ApplicationController {
 
     @GetMapping
     public ResponseEntity<List<ApplicationDto>> getAllApplications() {
-        logger.info("Fetching all applications");
+        log.info("Fetching all applications");
         List<Application> applications = applicationService.getAllApplications();
         return ResponseEntity.ok(applicationMapper.toDtoList(applications));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApplicationDto> getApplicationById(@PathVariable Long id) {
-        logger.info("Fetching application with id: {}", id);
+        log.info("Fetching application with id: {}", id);
         Optional<Application> application = applicationService.getApplicationById(id);
         return application.map(app -> ResponseEntity.ok(applicationMapper.toDto(app)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApplicationDto> updateApplication(@PathVariable Long id, @RequestBody ApplicationRequestDto requestDto) {
-        logger.info("Updating application with id: {}", id);
+    public ResponseEntity<ApplicationDto> updateApplication(
+            @PathVariable Long id,
+            @RequestParam String applicationType,
+            @RequestParam(required = false) String description) {
+        log.info("Updating application with id: {}", id);
         Optional<Application> optionalApplication = applicationService.getApplicationById(id);
         if (optionalApplication.isPresent()) {
+            ApplicationRequestDto requestDto = new ApplicationRequestDto(applicationType, description);
             Application existingApplication = optionalApplication.get();
             applicationMapper.updateEntityFromDto(requestDto, existingApplication);
             Application updatedApplication = applicationService.updateApplication(existingApplication);
@@ -66,7 +71,7 @@ public class ApplicationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteApplication(@PathVariable Long id) {
-        logger.info("Deleting application with id: {}", id);
+        log.info("Deleting application with id: {}", id);
         Optional<Application> application = applicationService.getApplicationById(id);
         if (application.isPresent()) {
             applicationService.deleteApplication(id);
