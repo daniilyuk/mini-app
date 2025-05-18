@@ -29,7 +29,7 @@ public class ApplicationController {
     @PostMapping
     public ResponseEntity<ApplicationDto> createApplication(
             @RequestParam String applicationType,
-            @RequestParam(required = false) String description) {
+            @RequestParam String description) {
         log.info("Creating new application with type={} and description={}", applicationType, description);
         ApplicationRequestDto requestDto = new ApplicationRequestDto(applicationType, description);
         Application application = applicationMapper.toEntity(requestDto);

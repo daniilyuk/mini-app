@@ -57,6 +57,7 @@ public class ApplicationMapper {
         }
 
         Application application = new Application();
+        application.setId(1L);
         application.setApplicationType(dto.getApplicationType());
         application.setDescription(dto.getDescription());
 

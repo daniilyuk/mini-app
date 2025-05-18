@@ -19,7 +19,7 @@ public class Application {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "application_type", nullable = false)
+    @Column(name = "application_type")
     private String applicationType;
 
     @Column(name = "description")
